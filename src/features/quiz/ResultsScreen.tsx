@@ -48,7 +48,7 @@ export function ResultsScreen({ kind, result, outcome, node, next, onRetry, onCo
   return (
     <div className="flex flex-1 flex-col">
       <div className="mx-auto w-full max-w-xl flex-1 px-4 pt-4 pb-8 text-center">
-        <motion.p initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200 }} className="text-6xl">
+        <motion.p initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200 }} className="inline-block text-6xl">
           {passed ? (kind === 'exam50' ? '🏆' : '🎉') : '💪'}
         </motion.p>
         <h1 className="mt-3 text-3xl font-black">{passed ? PASS_TITLES[kind] : '¡Casi lo logras!'}</h1>

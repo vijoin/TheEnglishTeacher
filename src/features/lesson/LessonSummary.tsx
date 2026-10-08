@@ -17,7 +17,7 @@ export function LessonSummary({ items, next, xp }: LessonSummaryProps) {
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-1 flex-col">
       <div className="mx-auto w-full max-w-xl flex-1 px-4 pb-6">
         <div className="text-center">
-          <motion.p className="text-6xl" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', delay: 0.1 }}>
+          <motion.p className="inline-block text-6xl" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', delay: 0.1 }}>
             🎉
           </motion.p>
           <h1 className="mt-3 text-3xl font-black">¡Lección completada!</h1>
