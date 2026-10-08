@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import { getNodeStatuses } from '../engine/path'
-import { playSfx, type SfxName } from '../lib/sfx'
-import { speak, type SpeakOptions } from '../lib/speech'
+import { speak, useEnglishVoices, type SpeakOptions } from '../lib/speech'
 import { useProgress } from '../store/progress'
 import { COURSE_PATH } from './course'
 
@@ -20,20 +19,18 @@ export function useSpeak() {
   )
 }
 
-export function useSfx() {
-  const enabled = useProgress((s) => s.settings.sfx)
-  return useCallback((name: SfxName) => enabled && playSfx(name), [enabled])
-}
-
-export function useNodeStatuses() {
+export function useStepStatuses() {
   const completed = useProgress((s) => s.completed)
   return useMemo(() => getNodeStatuses(COURSE_PATH, completed), [completed])
 }
 
-export function prefersReducedMotion(): boolean {
-  return typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+/** A focused button or link already reacts to Enter natively. */
+export function isButtonTarget(e: KeyboardEvent): boolean {
+  // Quiz options are the exception: Enter on a chosen option submits it.
+  return e.target instanceof HTMLElement && !!e.target.closest('button:not([data-choice]), a, [role="radio"]:not([data-choice]), [role="switch"], summary')
 }
 
-export function isButtonTarget(e: KeyboardEvent): boolean {
-  return e.target instanceof HTMLElement && !!e.target.closest('button, a, [role="radio"], [role="switch"]')
+/** True once the device offers at least one English voice. */
+export function useHasVoices(): boolean {
+  return useEnglishVoices().length > 0
 }

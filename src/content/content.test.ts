@@ -1,4 +1,5 @@
-import { normalizeAnswer, tokenize } from '../engine/answer'
+import { checkTyped, normalizeAnswer, tokenize } from '../engine/answer'
+import { KNOWN_WORDS } from '../features/course'
 import { ALL_ITEMS, COURSE, getItem, getLevel } from './index'
 
 const norm = (s: string) => normalizeAnswer(s)
@@ -44,7 +45,8 @@ test.each(COURSE.map((l) => [l.id, l] as const))('level %i: Spanish is unique an
 
 test('every item is well formed', () => {
   for (const i of ALL_ITEMS) {
-    for (const s of [i.en, i.es, i.example.en, i.example.es]) {
+    expect(i.examples, i.id).toHaveLength(3)
+    for (const s of [i.en, i.es, ...i.examples.flatMap((e) => [e.en, e.es])]) {
       expect(s, i.id).toBe(s.trim())
       expect(s.length, i.id).toBeGreaterThan(0)
     }
@@ -53,4 +55,15 @@ test('every item is well formed', () => {
     if (i.kind === 'phrase') expect(tokenize(i.en).length, i.id).toBeLessThanOrEqual(10)
     if (i.note) expect(i.note.length, i.id).toBeLessThanOrEqual(140)
   }
+})
+
+test("typing another item's English is never accepted as a typo", () => {
+  // Exact matches stay valid (typing "book" for "to book" is right).
+  const accepted: string[] = []
+  for (const a of ALL_ITEMS) {
+    for (const b of ALL_ITEMS) {
+      if (a !== b && checkTyped(b.en, a, KNOWN_WORDS) === 'typo') accepted.push(`${b.en} → ${a.en}`)
+    }
+  }
+  expect(accepted).toEqual([])
 })

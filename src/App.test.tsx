@@ -9,22 +9,47 @@ beforeEach(() => {
   navigate('/', { replace: true })
 })
 
-test('boots on the learning path and navigates between sections', async () => {
+test('boots on the course index and navigates between sections', async () => {
   const user = userEvent.setup()
   render(<App />)
-  expect(screen.getAllByRole('link', { name: /The English Teacher/i }).length).toBeGreaterThan(0)
-  expect(screen.getByRole('button', { name: /^Lección 1 · Saludos — disponible$/ })).toBeEnabled()
-
-  await user.click(screen.getAllByRole('button', { name: /Vocabulario/i })[0])
+  expect(screen.getByRole('heading', { name: 'Primeros pasos' })).toBeInTheDocument()
+  await user.click(screen.getByRole('button', { name: 'Vocabulario' }))
   expect(screen.getByRole('heading', { name: 'Vocabulario' })).toBeInTheDocument()
-
-  await user.click(screen.getAllByRole('button', { name: /Perfil/i })[0])
-  expect(screen.getByRole('heading', { name: 'Tu progreso' })).toBeInTheDocument()
+  await user.click(screen.getByRole('button', { name: 'Ajustes' }))
+  expect(screen.getByRole('heading', { name: 'Ajustes' })).toBeInTheDocument()
 })
 
-test('opening the first lesson shows its first card', async () => {
+test('a lesson shows one word at a time and then leads into its quiz', async () => {
   const user = userEvent.setup()
   render(<App />)
-  await user.click(screen.getByRole('button', { name: /^Lección 1 · Saludos — disponible$/ }))
-  expect(await screen.findByRole('heading', { level: 1, name: 'hello' })).toBeInTheDocument()
+  await user.click(screen.getByRole('button', { name: /Empezar/ }))
+  expect(screen.getByRole('heading', { level: 1, name: 'hello' })).toBeInTheDocument()
+  expect(screen.getByText('hola')).toBeInTheDocument()
+  expect(screen.getByText('Hello, my name is Tom.')).toBeInTheDocument()
+  expect(screen.getAllByRole('listitem')).toHaveLength(3)
+
+  for (let i = 0; i < 4; i++) await user.click(screen.getByRole('button', { name: /Siguiente/ }))
+  expect(screen.getByRole('heading', { level: 1, name: 'How are you?' })).toBeInTheDocument()
+  await user.click(screen.getByRole('button', { name: /Ir al quiz/ }))
+
+  expect(useProgress.getState().completed['1:0']).toBeDefined()
+  expect(window.location.hash).toBe('#/play/1:1')
+  expect(screen.getByRole('heading', { name: 'Quiz de la lección 1' })).toBeInTheDocument()
+  expect(screen.getByText(/hay que acertar todas/)).toBeInTheDocument()
+})
+
+test('a locked step sends the learner back to the index', () => {
+  navigate('/play/1:5', { replace: true })
+  render(<App />)
+  expect(window.location.hash).toBe('#/')
+  expect(screen.getByRole('heading', { name: 'Primeros pasos' })).toBeInTheDocument()
+})
+
+test('leaving a lesson after the first word asks for confirmation', async () => {
+  const user = userEvent.setup()
+  render(<App />)
+  await user.click(screen.getByRole('button', { name: /Empezar/ }))
+  await user.click(screen.getByRole('button', { name: /Siguiente/ }))
+  await user.click(screen.getByRole('button', { name: 'Salir' }))
+  expect(screen.getByRole('alertdialog')).toHaveTextContent('¿Salir de la lección?')
 })

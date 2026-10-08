@@ -3,21 +3,18 @@ import { useSyncExternalStore } from 'react'
 export type Route =
   | { name: 'home' }
   | { name: 'play'; nodeId: string }
-  | { name: 'practice' }
   | { name: 'vocab' }
-  | { name: 'profile' }
+  | { name: 'settings' }
 
 export function parseRoute(hash: string): Route {
   const parts = hash.replace(/^#\/?/, '').split('/').filter(Boolean)
   switch (parts[0]) {
     case 'play':
       return parts[1] ? { name: 'play', nodeId: decodeURIComponent(parts[1]) } : { name: 'home' }
-    case 'practice':
-      return { name: 'practice' }
     case 'vocab':
       return { name: 'vocab' }
-    case 'profile':
-      return { name: 'profile' }
+    case 'settings':
+      return { name: 'settings' }
     default:
       return { name: 'home' }
   }

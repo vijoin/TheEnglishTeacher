@@ -32,7 +32,7 @@ describe('buildLevelPath', () => {
 
   test('titles', () => {
     expect(path[0].title).toBe('Lesson 1')
-    expect(path[1].title).toBe('Quiz rápido')
+    expect(path[1].title).toBe('Quiz')
     expect(path[8].title).toBe('Repaso')
     expect(path[22].title).toBe('Examen del nivel')
   })

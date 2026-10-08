@@ -1,19 +1,12 @@
-import { Flame } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ArrowRight } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button } from '../../components/Button'
-import { ConfirmDialog } from '../../components/ConfirmDialog'
-import type { Item } from '../../content/types'
 import { gradeQuestion, type Grade, type Response } from '../../engine/grade'
-import { questionItemIds, type Question } from '../../engine/quiz'
-import { getItem } from '../course'
-import { isButtonTarget, useSettings, useSfx, useSpeak } from '../hooks'
-import { PlayerHeader } from '../player/PlayerHeader'
-import { FeedbackSheet } from './FeedbackSheet'
-import { BuildQuestion } from './questions/BuildQuestion'
-import { ChoiceQuestion } from './questions/ChoiceQuestion'
-import { MatchQuestion } from './questions/MatchQuestion'
-import { TypeQuestion } from './questions/TypeQuestion'
+import type { Question } from '../../engine/quiz'
+import { getItem, KNOWN_WORDS } from '../course'
+import { isButtonTarget, useSettings, useSpeak } from '../hooks'
+import { PlayerFooter, PlayerHeader } from '../player/PlayerHeader'
+import { QuestionView } from './QuestionView'
 
 export interface QuizResult {
   correct: number
@@ -23,204 +16,93 @@ export interface QuizResult {
 }
 
 interface QuizPlayerProps {
+  title: string
   questions: Question[]
   onFinish: (result: QuizResult) => void
-  onExit: () => void
+  onClose: () => void
 }
 
-interface Answered {
-  correct: boolean
-  wrongIds: string[]
-  rightIds: string[]
+function hasAnswer(r: Response | null): boolean {
+  return !!r && r.value.trim().length > 0
 }
 
-function canCheck(r: Response | null): boolean {
-  if (!r) return false
-  if (r.kind === 'text') return r.value.trim().length > 0
-  if (r.kind === 'tiles') return r.value.length > 0
-  return true
-}
-
-const items = (ids: string[]) => ids.map(getItem).filter((i): i is Item => !!i)
-
-export function QuizPlayer({ questions, onFinish, onExit }: QuizPlayerProps) {
-  const sfx = useSfx()
+/** Every question must be answered before moving on; there is no skip. */
+export function QuizPlayer({ title, questions, onFinish, onClose }: QuizPlayerProps) {
   const say = useSpeak()
   const { autoplay } = useSettings()
   const [index, setIndex] = useState(0)
   const [response, setResponse] = useState<Response | null>(null)
   const [grade, setGrade] = useState<Grade | null>(null)
-  const [answers, setAnswers] = useState<Answered[]>([])
-  const [combo, setCombo] = useState(0)
-  const [confirmExit, setConfirmExit] = useState(false)
+  const [results, setResults] = useState<{ itemId: string; correct: boolean }[]>([])
   const question = questions[index]
-  const ids = useMemo(() => questionItemIds(question), [question])
-  const item = getItem(ids[0])!
+  const item = getItem(question.itemId)!
+  const last = index === questions.length - 1
 
-  const submit = useCallback(
-    (r: Response) => {
-      const g = gradeQuestion(question, r, getItem)
-      const wrongIds = g.correct ? [] : r.kind === 'match' ? r.wrongItemIds : ids
-      setResponse(r)
-      setGrade(g)
-      setAnswers((a) => [...a, { correct: g.correct, wrongIds, rightIds: ids.filter((id) => !wrongIds.includes(id)) }])
-      setCombo((c) => (g.correct ? c + 1 : 0))
-      sfx(g.correct ? 'correct' : 'wrong')
-      if (autoplay && question.type !== 'match') say(item.en)
-    },
-    [question, ids, item, autoplay, say, sfx],
-  )
-
-  const check = useCallback(() => {
-    if (!grade && canCheck(response)) submit(response!)
-  }, [grade, response, submit])
+  const answer = useCallback(() => {
+    if (grade || !response || !hasAnswer(response)) return
+    const g = gradeQuestion(question, response, getItem, KNOWN_WORDS)
+    setGrade(g)
+    setResults((r) => [...r, { itemId: question.itemId, correct: g.correct }])
+    if (autoplay) say(item.en)
+  }, [grade, response, question, item.en, autoplay, say])
 
   const next = useCallback(() => {
-    if (index + 1 >= questions.length) {
-      const wrong = new Set(answers.flatMap((a) => a.wrongIds))
+    if (!grade) return
+    if (last) {
       onFinish({
-        correct: answers.filter((a) => a.correct).length,
+        correct: results.filter((r) => r.correct).length,
         total: questions.length,
-        wrongItemIds: [...wrong],
-        // An item missed anywhere in this quiz doesn't earn its mistake back.
-        rightItemIds: [...new Set(answers.flatMap((a) => a.rightIds))].filter((id) => !wrong.has(id)),
+        wrongItemIds: results.filter((r) => !r.correct).map((r) => r.itemId),
+        rightItemIds: results.filter((r) => r.correct).map((r) => r.itemId),
       })
       return
     }
     setIndex((i) => i + 1)
     setResponse(null)
     setGrade(null)
-  }, [index, questions.length, answers, onFinish])
+  }, [grade, last, results, questions.length, onFinish])
 
   useEffect(() => {
-    if (confirmExit) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Enter' || isButtonTarget(e)) return
+      if (e.key !== 'Enter' || isButtonTarget(e) || document.querySelector('[role="alertdialog"]')) return
       e.preventDefault()
       if (grade) next()
-      else check()
+      else answer()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [grade, next, check, confirmExit])
-
-  const skippable = question.type === 'type' || question.type === 'build'
-  const matchWrong = grade && !grade.correct && response?.kind === 'match' ? items(response.wrongItemIds) : []
+  }, [grade, next, answer])
 
   return (
     <>
       <PlayerHeader
+        title={title}
         progress={(index + (grade ? 1 : 0)) / questions.length}
-        onClose={() => setConfirmExit(true)}
-        right={
-          combo >= 3 ? (
-            <motion.span
-              key={combo}
-              initial={{ scale: 0.6 }}
-              animate={{ scale: 1 }}
-              className="flex shrink-0 items-center gap-1 font-extrabold text-orange-500"
-              aria-label={`${combo} respuestas correctas seguidas`}
-            >
-              <Flame className="h-5 w-5 fill-orange-400" /> {combo}
-            </motion.span>
-          ) : (
-            <span className="shrink-0 text-sm font-extrabold text-muted">
-              {index + 1}/{questions.length}
-            </span>
-          )
-        }
+        onClose={onClose}
+        right={`${index + 1} / ${questions.length}`}
       />
-      <div className="mx-auto w-full max-w-2xl flex-1 px-4 pt-2 pb-8">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={question.id}
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -40 }}
-            transition={{ duration: 0.2 }}
-          >
-            {(question.type === 'choice-en-es' || question.type === 'choice-es-en' || question.type === 'listen') && (
-              <ChoiceQuestion
-                type={question.type}
-                item={item}
-                options={question.options}
-                answer={question.answer}
-                value={response?.kind === 'choice' ? response.value : null}
-                grade={grade}
-                onSelect={(value) => setResponse({ kind: 'choice', value })}
-              />
-            )}
-            {question.type === 'type' && (
-              <TypeQuestion
-                item={item}
-                value={response?.kind === 'text' ? response.value : ''}
-                grade={grade}
-                onChange={(value) => setResponse({ kind: 'text', value })}
-              />
-            )}
-            {question.type === 'build' && (
-              <BuildQuestion
-                item={item}
-                tiles={question.tiles}
-                selected={response?.kind === 'tiles' ? tileIndexes(question.tiles, response.value) : []}
-                grade={grade}
-                onChange={(sel) => setResponse({ kind: 'tiles', value: sel.map((i) => question.tiles[i]) })}
-              />
-            )}
-            {question.type === 'match' && (
-              <MatchQuestion items={items(question.itemIds)} disabled={!!grade} onComplete={(r) => submit({ kind: 'match', ...r })} />
-            )}
-          </motion.div>
-        </AnimatePresence>
+      <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
+        <article key={question.id} className="animate-enter rounded-xl border border-line bg-surface p-5 shadow-sm sm:p-8">
+          <p className="mb-4 text-sm text-muted tabular-nums">
+            Pregunta {index + 1} de {questions.length}
+          </p>
+          <QuestionView question={question} item={item} response={response} grade={grade} onResponse={setResponse} />
+        </article>
       </div>
-
-      <div className="sticky bottom-0 z-10">
+      <PlayerFooter>
         {grade ? (
-          <FeedbackSheet
-            grade={grade}
-            reveal={question.type === 'match' ? matchWrong : [item]}
-            answerText={'answer' in question ? question.answer : undefined}
-            praiseIndex={index}
-            onContinue={next}
-          />
+          <Button size="lg" onClick={next} autoFocus>
+            {last ? 'Ver resultado' : 'Siguiente pregunta'} <ArrowRight className="h-5 w-5" />
+          </Button>
         ) : (
-          question.type !== 'match' && (
-            <div className="border-t border-line bg-bg/90 backdrop-blur-md">
-              <div className="mx-auto flex w-full max-w-2xl gap-3 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-                {skippable && (
-                  <Button variant="outline" size="lg" className="whitespace-nowrap" onClick={() => submit({ kind: 'text', value: '' })}>
-                    No lo sé
-                  </Button>
-                )}
-                <Button variant="accent" size="lg" block disabled={!canCheck(response)} onClick={check}>
-                  Comprobar
-                </Button>
-              </div>
-            </div>
-          )
+          <>
+            {!hasAnswer(response) && <p className="mr-auto self-center text-sm text-muted">Responde para continuar.</p>}
+            <Button size="lg" onClick={answer} disabled={!hasAnswer(response)}>
+              Responder
+            </Button>
+          </>
         )}
-      </div>
-
-      <ConfirmDialog
-        open={confirmExit}
-        title="¿Salir del quiz?"
-        message="Tu resultado no se guardará."
-        confirmLabel="Salir del quiz"
-        cancelLabel="Seguir respondiendo"
-        danger
-        onConfirm={onExit}
-        onCancel={() => setConfirmExit(false)}
-      />
+      </PlayerFooter>
     </>
   )
-}
-
-/** Maps chosen tile texts back to tile indexes, honouring duplicates. */
-function tileIndexes(tiles: string[], chosen: string[]): number[] {
-  const used = new Set<number>()
-  return chosen.map((word) => {
-    const i = tiles.findIndex((t, idx) => t === word && !used.has(idx))
-    used.add(i)
-    return i
-  })
 }

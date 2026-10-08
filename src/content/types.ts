@@ -12,7 +12,8 @@ export interface ItemInput {
   en: string
   es: string
   kind: ItemKind
-  example: Example
+  /** Three short sentences showing how the word or phrase is used. */
+  examples: Example[]
   /** Other English answers accepted when the learner types the answer. */
   alt?: string[]
   /** Short tip in Spanish shown on the lesson card. */

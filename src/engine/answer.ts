@@ -45,11 +45,8 @@ export function levenshtein(a: string, b: string): number {
   return prev[b.length]
 }
 
-function typoTolerance(answer: string): number {
-  if (answer.length <= 3) return 0
-  if (answer.length <= 8) return 1
-  return 2
-}
+const MIN_FUZZY_WORD = 4
+const MAX_SLIPPED_WORDS = 2
 
 function acceptedAnswers(item: { en: string; alt?: string[] }): string[] {
   const out = new Set<string>()
@@ -63,13 +60,33 @@ function acceptedAnswers(item: { en: string; alt?: string[] }): string[] {
   return [...out]
 }
 
-export function checkTyped(input: string, item: { en: string; alt?: string[] }): TypedResult {
+/**
+ * A slip is a missing/extra space, or up to two words each off by one letter.
+ * Short words never get leeway, and a word that is itself a known English
+ * word ("red" for "read", "fire" for "hire") is a different answer, not a slip.
+ */
+function isSlip(given: string, target: string, vocabulary: ReadonlySet<string>): boolean {
+  if (given.replace(/ /g, '') === target.replace(/ /g, '')) return true
+  const g = given.split(' ')
+  const t = target.split(' ')
+  if (g.length !== t.length) return false
+  let slipped = 0
+  for (let i = 0; i < t.length; i++) {
+    if (g[i] === t[i]) continue
+    slipped++
+    if (slipped > MAX_SLIPPED_WORDS) return false
+    if (t[i].length < MIN_FUZZY_WORD || levenshtein(g[i], t[i]) > 1 || vocabulary.has(g[i])) return false
+  }
+  return slipped > 0
+}
+
+/** `vocabulary` lists known English words (normalized) to tell slips from other words. */
+export function checkTyped(input: string, item: { en: string; alt?: string[] }, vocabulary: ReadonlySet<string> = new Set()): TypedResult {
   const given = normalizeAnswer(input)
   if (!given) return 'wrong'
   const accepted = acceptedAnswers(item)
   if (accepted.includes(given)) return 'correct'
-  const close = accepted.some((a) => levenshtein(given, a) <= typoTolerance(a))
-  return close ? 'typo' : 'wrong'
+  return accepted.some((a) => isSlip(given, a, vocabulary)) ? 'typo' : 'wrong'
 }
 
 /** Splits a phrase into word tiles, keeping inner apostrophes ("don't"). */

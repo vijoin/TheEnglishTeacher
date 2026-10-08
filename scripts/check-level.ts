@@ -22,7 +22,18 @@ else {
       for (const f of ['en', 'es'] as const) {
         if (typeof item[f] !== 'string' || !item[f].trim() || item[f] !== item[f].trim()) errors.push(`${where}: bad ${f}`)
       }
-      if (!item.example?.en?.trim() || !item.example?.es?.trim()) errors.push(`${where}: missing example`)
+      if (!Array.isArray(item.examples) || item.examples.length !== 3) errors.push(`${where}: needs exactly 3 examples`)
+      else {
+        const seenEx = new Set<string>()
+        for (const ex of item.examples) {
+          if (!ex?.en?.trim() || !ex?.es?.trim() || ex.en !== ex.en.trim() || ex.es !== ex.es.trim()) errors.push(`${where}: bad example`)
+          else if (ex.en.split(/\s+/).length > 14) errors.push(`${where}: example too long: ${ex.en}`)
+          if (seenEx.has(norm(ex.en))) errors.push(`${where}: repeated example`)
+          seenEx.add(norm(ex.en))
+          if (/[\u2018\u2019]/.test(ex.en)) errors.push(`${where}: curly apostrophe in example`)
+        }
+      }
+      if ('example' in item) errors.push(`${where}: old "example" field still present`)
       if (item.kind === 'word') words++
       else if (item.kind === 'phrase') phrases++
       else errors.push(`${where}: bad kind`)

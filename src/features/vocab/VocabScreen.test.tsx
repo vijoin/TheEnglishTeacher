@@ -7,36 +7,23 @@ beforeEach(() => useProgress.setState(initialProgress()))
 
 test('empty state before any lesson', () => {
   render(<VocabScreen />)
-  expect(screen.getByText(/Aún no has aprendido palabras/i)).toBeInTheDocument()
+  expect(screen.getByText(/Aún no has aprendido palabras/)).toBeInTheDocument()
 })
 
-test('lists learned items, searches in both languages and flags mistakes', async () => {
+test('lists learned words with examples, searches both languages and flags mistakes', async () => {
   const user = userEvent.setup()
-  useProgress.getState().completeLesson('1:0', '2026-10-08')
+  useProgress.getState().completeLesson('1:0')
   useProgress.setState({ mistakes: { '1-01-2': 1 } })
   render(<VocabScreen />)
 
-  expect(screen.getByText(/5 palabras y frases/i)).toBeInTheDocument()
-  expect(screen.getAllByRole('listitem')).toHaveLength(5)
-  expect(screen.getByText(/Para repasar/i)).toBeInTheDocument()
+  expect(screen.getByText('5 palabras y frases aprendidas')).toBeInTheDocument()
+  expect(screen.getAllByText(/^= /)).toHaveLength(5)
+  expect(screen.getByText('Para repasar')).toBeInTheDocument()
 
-  const search = screen.getByRole('searchbox')
-  await user.type(search, 'adios')
-  expect(screen.getAllByRole('listitem')).toHaveLength(1)
+  await user.type(screen.getByRole('searchbox'), 'adios')
+  expect(screen.getAllByText(/^= /)).toHaveLength(1)
   expect(screen.getByText('goodbye')).toBeInTheDocument()
 
-  await user.clear(search)
-  await user.type(search, 'MORNING')
-  expect(screen.getAllByRole('listitem')).toHaveLength(1)
-
-  await user.click(screen.getByRole('button', { name: /Practicar errores/i }))
-  expect(window.location.hash).toBe('#/practice')
-})
-
-test('kind filter', async () => {
-  const user = userEvent.setup()
-  useProgress.getState().completeLesson('1:0', '2026-10-08')
-  render(<VocabScreen />)
-  await user.click(screen.getByRole('radio', { name: 'Frases' }))
-  expect(screen.getAllByRole('listitem')).toHaveLength(3)
+  await user.click(screen.getByText('goodbye'))
+  expect(screen.getByText('Goodbye, Anna! See you later.')).toBeVisible()
 })

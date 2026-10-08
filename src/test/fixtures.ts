@@ -15,12 +15,12 @@ export function makeLevelInput(id: number): LevelInput {
       items: Array.from({ length: 5 }, (_, ii): ItemInput => {
         const n = `${id}x${li + 1}x${ii + 1}`
         return ii % 2 === 0
-          ? { en: `word${n}`, es: `palabra${n}`, kind: 'word', example: { en: `A word${n}.`, es: `Una palabra${n}.` } }
+          ? { en: `word${n}`, es: `palabra${n}`, kind: 'word', examples: [{ en: `A word${n}.`, es: `Una palabra${n}.` }] }
           : {
               en: `This is phrase p${n}.`,
               es: `Esta es la frase f${n}.`,
               kind: 'phrase',
-              example: { en: `This is phrase p${n}.`, es: `Esta es la frase f${n}.` },
+              examples: [{ en: `This is phrase p${n}.`, es: `Esta es la frase f${n}.` }],
             }
       }),
     })),

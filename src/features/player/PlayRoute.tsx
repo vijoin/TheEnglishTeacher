@@ -1,32 +1,60 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { ConfirmDialog } from '../../components/ConfirmDialog'
+import { nextNodeId } from '../../engine/path'
 import { navigate } from '../../lib/router'
-import { getLevel, getNode, nodeItems } from '../course'
-import { useNodeStatuses } from '../hooks'
-import { LessonPlayer } from '../lesson/LessonPlayer'
-import { QuizRunner } from '../quiz/QuizRunner'
+import { useProgress } from '../../store/progress'
+import { COURSE_PATH, getNode, nodeItems, nodeLabel } from '../course'
+import { useStepStatuses } from '../hooks'
+import { QuizSession } from '../quiz/QuizSession'
+import { StudyPlayer } from '../study/StudyPlayer'
+import { PlayerFrame } from './PlayerHeader'
 
-export function PlayRoute({ nodeId }: { nodeId: string }) {
-  const statuses = useNodeStatuses()
-  const node = getNode(nodeId)
-  const allowed = !!node && statuses[nodeId] !== 'locked'
-  // Stable identity so the quiz isn't regenerated when progress changes.
-  const items = useMemo(() => (node ? nodeItems(node) : []), [node])
+const home = () => navigate('/', { replace: true })
+
+export function PlayRoute({ stepId }: { stepId: string }) {
+  const statuses = useStepStatuses()
+  const completeLesson = useProgress((s) => s.completeLesson)
+  const step = getNode(stepId)
+  const allowed = !!step && statuses[stepId] !== 'locked'
+  // Stable identity so a session isn't rebuilt when progress changes.
+  const items = useMemo(() => (step ? nodeItems(step) : []), [step])
+  const [confirmExit, setConfirmExit] = useState(false)
 
   useEffect(() => {
-    if (!allowed) navigate('/', { replace: true })
+    if (!allowed) home()
   }, [allowed])
 
-  if (!node || !allowed) return null
-  const level = getLevel(node.levelId)!
-  if (node.kind === 'lesson') return <LessonPlayer node={node} />
+  if (!step || !allowed) return null
+  const nextId = nextNodeId(COURSE_PATH, step.id)
+  const goNext = () => (nextId ? navigate(`/play/${nextId}`, { replace: true }) : home())
 
-  const first = level.items.findIndex((i) => i.id === items[0].id) + 1
-  const description =
-    node.kind === 'quiz5'
-      ? `Pon a prueba las 5 palabras de la lección ${node.lessonIndex + 1}: ${level.lessons[node.lessonIndex].title}.`
-      : node.kind === 'review20'
-        ? `Repasa las palabras ${first}–${first + items.length - 1} del nivel ${level.id}.`
-        : `Demuestra lo que sabes de las 50 palabras y frases del nivel ${level.id}${level.id < 6 ? ' y desbloquea el siguiente.' : '.'}`
-
-  return <QuizRunner kind={node.kind} items={items} accent={level.color} description={description} node={node} />
+  return (
+    <PlayerFrame>
+      {step.kind === 'lesson' ? (
+        <>
+          <StudyPlayer
+            title={nodeLabel(step)}
+            items={items}
+            finishLabel="Ir al quiz"
+            onClose={(studiedAny) => (studiedAny ? setConfirmExit(true) : home())}
+            onFinish={() => {
+              completeLesson(step.id)
+              goNext()
+            }}
+          />
+          <ConfirmDialog
+            open={confirmExit}
+            title="¿Salir de la lección?"
+            message="La lección quedará pendiente hasta que veas todas sus palabras."
+            confirmLabel="Salir"
+            cancelLabel="Seguir"
+            onConfirm={home}
+            onCancel={() => setConfirmExit(false)}
+          />
+        </>
+      ) : (
+        <QuizSession step={step} items={items} onContinue={goNext} onHome={home} />
+      )}
+    </PlayerFrame>
+  )
 }

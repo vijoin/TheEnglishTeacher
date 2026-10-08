@@ -16,7 +16,7 @@ export interface PathNode {
 }
 
 export const NODE_TITLES: Record<Exclude<NodeKind, 'lesson'>, string> = {
-  quiz5: 'Quiz rápido',
+  quiz5: 'Quiz',
   review20: 'Repaso',
   exam50: 'Examen del nivel',
 }

@@ -9,7 +9,7 @@ interface SegmentedProps<T extends string | number> {
 
 export function Segmented<T extends string | number>({ value, options, onChange, label }: SegmentedProps<T>) {
   return (
-    <div role="radiogroup" aria-label={label} className="flex gap-1 rounded-2xl bg-surface-2 p-1">
+    <div role="radiogroup" aria-label={label} className="flex rounded-lg border border-line bg-surface-2 p-0.5">
       {options.map((o) => (
         <button
           key={String(o.value)}
@@ -18,7 +18,7 @@ export function Segmented<T extends string | number>({ value, options, onChange,
           aria-checked={o.value === value}
           onClick={() => onChange(o.value)}
           className={cn(
-            'flex-1 rounded-xl px-3 py-2 text-sm font-bold transition',
+            'flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition',
             o.value === value ? 'bg-surface text-ink shadow-sm' : 'text-muted hover:text-ink',
           )}
         >
