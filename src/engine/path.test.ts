@@ -76,3 +76,12 @@ describe('statuses and unlocking', () => {
     expect(nextNodeId(path, '2:22')).toBeNull()
   })
 })
+
+test('test mode unlocks every step without marking anything done', () => {
+  const path = buildCoursePath(course)
+  const s = getNodeStatuses(path, { '1:0': {} }, { unlockAll: true })
+  expect(s['1:0']).toBe('completed')
+  expect(s['1:22']).toBe('available')
+  expect(s['2:0']).toBe('available')
+  expect(isLevelUnlocked(2, path, {}, { unlockAll: true })).toBe(true)
+})

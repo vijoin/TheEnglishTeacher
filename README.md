@@ -35,6 +35,7 @@ Tipos de pregunta: qué significa (inglés → español), cómo se dice (españo
 - **Curso**: índice del nivel con el estado de cada paso y botón "Continuar".
 - **Vocabulario**: palabras aprendidas, con búsqueda, audio y ejemplos.
 - **Ajustes**: tema claro/oscuro, pronunciación automática, voz, velocidad y reinicio del progreso.
+- **Modo de prueba** (en Ajustes): "Desbloquear todos los niveles" abre todas las lecciones, quizzes y niveles para probarlos sin completar los anteriores.
 
 El audio usa las voces en inglés del navegador; si no hay ninguna, los botones de audio y las preguntas de escucha no aparecen. El progreso se guarda en el navegador (`localStorage`).
 

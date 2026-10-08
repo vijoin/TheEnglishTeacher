@@ -16,6 +16,8 @@ export interface Settings {
   voiceURI: string | null
   rate: number
   autoplay: boolean
+  /** Test mode: open every level and step without completing earlier ones. */
+  unlockAll: boolean
 }
 
 export interface QuizRecord {
@@ -48,6 +50,7 @@ export const DEFAULT_SETTINGS: Settings = {
   voiceURI: null,
   rate: 0.95,
   autoplay: true,
+  unlockAll: false,
 }
 
 export function initialProgress(): ProgressData {
@@ -113,6 +116,7 @@ export function migrateProgress(persisted: unknown, _version: number): ProgressD
     voiceURI: typeof old.voiceURI === 'string' ? old.voiceURI : null,
     rate: typeof old.rate === 'number' ? snapRate(old.rate) : DEFAULT_SETTINGS.rate,
     autoplay: typeof old.autoplay === 'boolean' ? old.autoplay : DEFAULT_SETTINGS.autoplay,
+    unlockAll: old.unlockAll === true,
   }
   return { version: VERSION, completed, mistakes, settings }
 }

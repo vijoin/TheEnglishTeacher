@@ -31,3 +31,14 @@ test('finishing level 1 unlocks level 2 and marks level 1 done', () => {
   expect(screen.getByRole('button', { name: 'Lección 1 · Rutina de la mañana — disponible' })).toBeEnabled()
   expect(screen.getByRole('button', { name: /Nivel 1/ })).toContainElement(screen.getByLabelText('superado'))
 })
+
+test('in test mode every level and step is open, with a visible notice', async () => {
+  const user = userEvent.setup()
+  useProgress.getState().updateSettings({ unlockAll: true })
+  render(<HomeScreen />)
+  expect(screen.getByText(/Modo de prueba activo/)).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Examen del nivel 1 — disponible' })).toBeEnabled()
+  await user.click(within(screen.getByRole('group', { name: 'Niveles' })).getByRole('button', { name: /Nivel 6/ }))
+  expect(screen.queryByText(/Supera el examen/)).not.toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Lección 10 · Ganar tiempo al hablar — disponible' })).toBeEnabled()
+})

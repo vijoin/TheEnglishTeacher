@@ -59,7 +59,8 @@ export function QuizSession({ step, items, onContinue, onHome, generate }: QuizS
 
   const missed = (result?.wrongItemIds ?? []).map(getItem).filter((i): i is Item => !!i)
   const level = getLevel(step.levelId)!
-  const unlocked = step.kind === 'exam50' && !wasDone ? getLevel(step.levelId + 1) : undefined
+  const unlockAll = useProgress((s) => s.settings.unlockAll)
+  const unlocked = step.kind === 'exam50' && !wasDone && !unlockAll ? getLevel(step.levelId + 1) : undefined
   const askToLeave = () => setConfirmExit(true)
 
   const description =

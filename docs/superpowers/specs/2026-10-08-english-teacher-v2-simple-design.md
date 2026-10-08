@@ -29,6 +29,7 @@ Opción múltiple inglés → español, opción múltiple español → inglés, 
 - **Estudio**, **Quiz**, **Resultado** y **Repaso de fallos**, a pantalla completa con barra de progreso fina y botón para cerrar.
 - **Vocabulario**: palabras aprendidas con búsqueda y audio.
 - **Ajustes**: tema, pronunciación automática, voz, velocidad y reiniciar progreso.
+- **Modo de prueba** (añadido a pedido del usuario): el interruptor "Desbloquear todos los niveles" en Ajustes abre todos los pasos sin completar los anteriores. Está desactivado por defecto y el inicio muestra un aviso mientras está activo.
 
 ## Lo que se elimina
 

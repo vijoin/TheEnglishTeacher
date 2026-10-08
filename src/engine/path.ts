@@ -49,22 +49,27 @@ export function buildCoursePath(course: Level[]): PathNode[] {
   return course.flatMap(buildLevelPath)
 }
 
-/** Nodes unlock strictly in order across the whole course. */
-export function getNodeStatuses(path: PathNode[], completed: Record<string, unknown>): Record<string, NodeStatus> {
+export interface StatusOptions {
+  /** Test mode: every step is open, whatever has been completed. */
+  unlockAll?: boolean
+}
+
+/** Nodes unlock strictly in order across the whole course (unless in test mode). */
+export function getNodeStatuses(path: PathNode[], completed: Record<string, unknown>, { unlockAll = false }: StatusOptions = {}): Record<string, NodeStatus> {
   const out: Record<string, NodeStatus> = {}
   let previousDone = true
   for (const node of path) {
     const done = node.id in completed
-    out[node.id] = done ? 'completed' : previousDone ? 'available' : 'locked'
+    out[node.id] = done ? 'completed' : previousDone || unlockAll ? 'available' : 'locked'
     previousDone = done
   }
   return out
 }
 
-export function isLevelUnlocked(levelId: number, path: PathNode[], completed: Record<string, unknown>): boolean {
+export function isLevelUnlocked(levelId: number, path: PathNode[], completed: Record<string, unknown>, options?: StatusOptions): boolean {
   const first = path.find((n) => n.levelId === levelId)
   if (!first) return false
-  return getNodeStatuses(path, completed)[first.id] !== 'locked'
+  return getNodeStatuses(path, completed, options)[first.id] !== 'locked'
 }
 
 export function learnedItemIds(path: PathNode[], completed: Record<string, unknown>): string[] {
@@ -76,8 +81,7 @@ export function nextNodeId(path: PathNode[], nodeId: string): string | null {
   return i >= 0 && i + 1 < path.length ? path[i + 1].id : null
 }
 
-/** First node that is available but not yet completed. */
+/** First node not yet completed, in course order. */
 export function currentNodeId(path: PathNode[], completed: Record<string, unknown>): string | null {
-  const statuses = getNodeStatuses(path, completed)
-  return path.find((n) => statuses[n.id] === 'available')?.id ?? null
+  return path.find((n) => !(n.id in completed))?.id ?? null
 }

@@ -62,7 +62,7 @@ test('v1 progress migrates: steps, mistakes and compatible settings survive', ()
     version: 2,
     completed: { '1:0': { completedAt: '2026-10-08' } },
     mistakes: { '1-01-2': 1 },
-    settings: { theme: 'dark', voiceURI: null, rate: 0.75, autoplay: false },
+    settings: { theme: 'dark', voiceURI: null, rate: 0.75, autoplay: false, unlockAll: false },
   })
 })
 
@@ -99,4 +99,10 @@ describe('safeJSONStorage', () => {
 test('migration snaps an unexpected speech rate to a supported speed', () => {
   expect(migrateProgress({ settings: { rate: 9 } }, 1).settings.rate).toBe(1.1)
   expect(migrateProgress({ settings: { rate: 0.1 } }, 1).settings.rate).toBe(0.75)
+})
+
+test('test mode is off by default and survives migration', () => {
+  expect(initialProgress().settings.unlockAll).toBe(false)
+  expect(migrateProgress({ settings: { unlockAll: true } }, 2).settings.unlockAll).toBe(true)
+  expect(migrateProgress({ settings: { unlockAll: 'yes' } }, 2).settings.unlockAll).toBe(false)
 })

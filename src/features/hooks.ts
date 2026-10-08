@@ -21,7 +21,8 @@ export function useSpeak() {
 
 export function useStepStatuses() {
   const completed = useProgress((s) => s.completed)
-  return useMemo(() => getNodeStatuses(COURSE_PATH, completed), [completed])
+  const unlockAll = useProgress((s) => s.settings.unlockAll)
+  return useMemo(() => getNodeStatuses(COURSE_PATH, completed, { unlockAll }), [completed, unlockAll])
 }
 
 /** A focused button or link already reacts to Enter natively. */

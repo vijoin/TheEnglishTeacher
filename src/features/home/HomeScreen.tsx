@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Lock } from 'lucide-react'
+import { ArrowRight, Check, Lock, LockOpen } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Button } from '../../components/Button'
 import { ProgressBar } from '../../components/ProgressBar'
@@ -72,9 +72,19 @@ export function HomeScreen() {
   const done = steps.filter((n) => statuses[n.id] === 'completed').length
   const levelLocked = statuses[steps[0].id] === 'locked'
   const started = Object.keys(completed).length > 0
+  const unlockAll = useProgress((s) => s.settings.unlockAll)
 
   return (
     <div className="flex flex-col gap-8">
+      {unlockAll && (
+        <p className="-mb-4 flex flex-wrap items-center gap-x-2 rounded-lg border border-accent/40 bg-accent-soft px-4 py-2.5 text-sm">
+          <LockOpen className="h-4 w-4 shrink-0 text-accent" />
+          <span className="flex-1">Modo de prueba activo: todos los niveles están abiertos.</span>
+          <button type="button" onClick={() => navigate('/settings')} className="font-medium text-accent underline underline-offset-2">
+            Cambiar en Ajustes
+          </button>
+        </p>
+      )}
       <section aria-labelledby="next-title" className="rounded-xl border border-line bg-surface p-5">
         {next ? (
           <div className="flex flex-wrap items-center justify-between gap-4">

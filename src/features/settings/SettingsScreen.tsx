@@ -92,6 +92,15 @@ export function SettingsScreen() {
         )}
       </div>
 
+      <h2 className="mt-8 text-sm font-medium text-muted">Modo de prueba</h2>
+      <div className="mt-2 rounded-xl border border-line bg-surface">
+        <Row title="Desbloquear todos los niveles" hint="Abre todas las lecciones, quizzes y niveles para probarlos. Lo que completes en este modo se guarda.">
+          <div className="flex sm:justify-end">
+            <Switch label="Desbloquear todos los niveles" checked={settings.unlockAll} onChange={(unlockAll) => updateSettings({ unlockAll })} />
+          </div>
+        </Row>
+      </div>
+
       <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface px-5 py-4">
         <div>
           <p className="font-medium">Reiniciar progreso</p>

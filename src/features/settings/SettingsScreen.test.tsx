@@ -24,3 +24,10 @@ test('reset clears progress after confirmation', async () => {
   await user.click(screen.getByRole('button', { name: 'Sí, borrar todo' }))
   expect(useProgress.getState().completed).toEqual({})
 })
+
+test('the test-mode switch unlocks everything', async () => {
+  const user = userEvent.setup()
+  render(<SettingsScreen />)
+  await user.click(screen.getByRole('switch', { name: 'Desbloquear todos los niveles' }))
+  expect(useProgress.getState().settings.unlockAll).toBe(true)
+})

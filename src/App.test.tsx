@@ -53,3 +53,11 @@ test('leaving a lesson after the first word asks for confirmation', async () => 
   await user.click(screen.getByRole('button', { name: 'Salir' }))
   expect(screen.getByRole('alertdialog')).toHaveTextContent('¿Salir de la lección?')
 })
+
+test('in test mode an advanced step opens directly', () => {
+  useProgress.getState().updateSettings({ unlockAll: true })
+  navigate('/play/6:0', { replace: true })
+  render(<App />)
+  expect(window.location.hash).toBe('#/play/6:0')
+  expect(screen.getByRole('heading', { level: 1, name: 'however' })).toBeInTheDocument()
+})
