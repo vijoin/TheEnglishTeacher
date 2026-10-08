@@ -20,3 +20,14 @@ test('useRoute follows navigation', () => {
   act(() => navigate('/'))
   expect(result.current).toEqual({ name: 'home' })
 })
+
+test('navigation keeps working when the browser refuses history updates', () => {
+  const push = vi.spyOn(window.history, 'pushState').mockImplementation(() => {
+    throw new DOMException('blocked', 'SecurityError')
+  })
+  const { result } = renderHook(() => useRoute())
+  act(() => navigate('/profile'))
+  expect(result.current).toEqual({ name: 'profile' })
+  push.mockRestore()
+  act(() => navigate('/', { replace: true }))
+})

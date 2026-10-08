@@ -1,11 +1,12 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { navigate } from '../../lib/router'
 import { initialProgress, useProgress } from '../../store/progress'
 import { PlayRoute } from './PlayRoute'
 
 beforeEach(() => {
   useProgress.setState(initialProgress())
-  window.history.replaceState(null, '', '#/play/1:1')
+  navigate('/play/1:1', { replace: true })
 })
 
 test('a locked node sends the learner back to the map', () => {

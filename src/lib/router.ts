@@ -23,22 +23,41 @@ export function parseRoute(hash: string): Route {
   }
 }
 
+// The route lives in memory and is mirrored to the URL when the browser
+// allows it (sandboxed frames may refuse history updates).
+let current = typeof window === 'undefined' ? '' : window.location.hash
+const listeners = new Set<() => void>()
+const emit = () => listeners.forEach((l) => l())
+
 export function navigate(path: string, { replace = false } = {}): void {
   const hash = `#${path.startsWith('/') ? path : `/${path}`}`
-  if (hash === window.location.hash) return
-  if (replace) window.history.replaceState(null, '', hash)
-  else window.history.pushState(null, '', hash)
-  window.dispatchEvent(new HashChangeEvent('hashchange'))
+  if (hash === current) return
+  current = hash
+  try {
+    if (replace) window.history.replaceState(null, '', hash)
+    else window.history.pushState(null, '', hash)
+  } catch {
+    // Keep navigating in memory.
+  }
+  emit()
 }
 
 function subscribe(onChange: () => void) {
-  window.addEventListener('hashchange', onChange)
-  return () => window.removeEventListener('hashchange', onChange)
+  listeners.add(onChange)
+  const onHash = () => {
+    current = window.location.hash
+    emit()
+  }
+  window.addEventListener('hashchange', onHash)
+  window.addEventListener('popstate', onHash)
+  return () => {
+    listeners.delete(onChange)
+    window.removeEventListener('hashchange', onHash)
+    window.removeEventListener('popstate', onHash)
+  }
 }
 
-const getHash = () => window.location.hash
-
 export function useRoute(): Route {
-  const hash = useSyncExternalStore(subscribe, getHash, () => '')
+  const hash = useSyncExternalStore(subscribe, () => current, () => '')
   return parseRoute(hash)
 }

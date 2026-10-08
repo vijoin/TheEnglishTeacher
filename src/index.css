@@ -56,7 +56,8 @@
   color-scheme: light;
 }
 
-.dark {
+.dark,
+:root[data-theme='dark']:not(.light) {
   --bg: #0b0f1d;
   --surface: #141a2d;
   --surface-2: #1c2338;
@@ -66,6 +67,20 @@
   --brand: #818cf8;
   --brand-strong: #6366f1;
   color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not(.light) {
+    --bg: #0b0f1d;
+    --surface: #141a2d;
+    --surface-2: #1c2338;
+    --line: #2a3250;
+    --ink: #eef1fa;
+    --muted: #98a1bd;
+    --brand: #818cf8;
+    --brand-strong: #6366f1;
+    color-scheme: dark;
+  }
 }
 
 /* Per-level accent palettes, selected with data-accent="…". */

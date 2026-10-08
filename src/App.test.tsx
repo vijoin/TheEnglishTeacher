@@ -1,11 +1,12 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App'
+import { navigate } from './lib/router'
 import { initialProgress, useProgress } from './store/progress'
 
 beforeEach(() => {
   useProgress.setState(initialProgress())
-  window.history.replaceState(null, '', '#/')
+  navigate('/', { replace: true })
 })
 
 test('boots on the learning path and navigates between sections', async () => {

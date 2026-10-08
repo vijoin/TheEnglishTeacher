@@ -15,8 +15,10 @@
       try {
         var s = JSON.parse(localStorage.getItem('tet-progress') || '{}')
         var t = (s.state && s.state.settings && s.state.settings.theme) || 'system'
-        var dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
+        var host = document.documentElement.getAttribute('data-theme')
+        var dark = t === 'system' ? (host ? host === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches) : t === 'dark'
         if (dark) document.documentElement.classList.add('dark')
+        else if (t === 'light') document.documentElement.classList.add('light')
       } catch (e) {}
     </script>
   </head>

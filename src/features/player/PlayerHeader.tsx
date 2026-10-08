@@ -10,7 +10,7 @@ interface PlayerHeaderProps {
 
 export function PlayerHeader({ progress, onClose, right }: PlayerHeaderProps) {
   return (
-    <header className="sticky top-0 z-20 bg-bg/90 backdrop-blur-md">
+    <header className="sticky top-[env(safe-area-inset-top,0px)] z-20 bg-bg/90 backdrop-blur-md">
       <div className="mx-auto flex w-full max-w-2xl items-center gap-4 px-4 py-4">
         <button
           type="button"
