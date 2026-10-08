@@ -23,7 +23,10 @@ interface PathNodeButtonProps {
 export function PathNodeButton({ node, status, stars, emoji, offset, isCurrent }: PathNodeButtonProps) {
   const ref = useRef<HTMLButtonElement>(null)
   useEffect(() => {
-    if (isCurrent) ref.current?.scrollIntoView?.({ block: 'center', behavior: 'smooth' })
+    const el = ref.current
+    if (!isCurrent || !el) return
+    const { top, bottom } = el.getBoundingClientRect()
+    if (top < 80 || bottom > window.innerHeight * 0.85) el.scrollIntoView?.({ block: 'center', behavior: 'smooth' })
   }, [isCurrent])
 
   const size = SIZE[node.kind]

@@ -1,4 +1,4 @@
-import { Flame, Zap } from 'lucide-react'
+import { Check, Flame, Target, Zap } from 'lucide-react'
 import { ProgressRing } from '../../components/ProgressRing'
 import { currentStreak, toDateKey } from '../../engine/streak'
 import { cn } from '../../lib/cn'
@@ -30,7 +30,11 @@ export function StatsBar({ vertical = false }: { vertical?: boolean }) {
       </div>
       <div className={cn(chip, 'text-brand')} title={`Meta diaria: ${todayXp}/${goal} XP`}>
         <ProgressRing value={todayXp / goal} size={26} stroke={4} color={goalDone ? 'var(--color-emerald-500)' : 'var(--brand)'} label={`Meta diaria: ${todayXp} de ${goal} XP`}>
-          <span className="text-[10px]">{goalDone ? '✓' : ''}</span>
+          {goalDone ? (
+            <Check className="h-3.5 w-3.5 text-emerald-500" strokeWidth={3.5} />
+          ) : (
+            <Target className="h-3.5 w-3.5" strokeWidth={2.5} />
+          )}
         </ProgressRing>
         {vertical && (
           <span className="text-sm font-bold text-muted">

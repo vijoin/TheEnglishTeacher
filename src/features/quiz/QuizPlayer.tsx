@@ -188,7 +188,7 @@ export function QuizPlayer({ questions, onFinish, onExit }: QuizPlayerProps) {
             <div className="border-t border-line bg-bg/90 backdrop-blur-md">
               <div className="mx-auto flex w-full max-w-2xl gap-3 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
                 {skippable && (
-                  <Button variant="outline" size="lg" onClick={() => submit({ kind: 'text', value: '' })}>
+                  <Button variant="outline" size="lg" className="whitespace-nowrap" onClick={() => submit({ kind: 'text', value: '' })}>
                     No lo sé
                   </Button>
                 )}

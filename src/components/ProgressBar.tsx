@@ -4,11 +4,12 @@ import { cn } from '../lib/cn'
 interface ProgressBarProps {
   value: number
   className?: string
+  trackClassName?: string
   barClassName?: string
   label?: string
 }
 
-export function ProgressBar({ value, className, barClassName = 'bg-accent', label }: ProgressBarProps) {
+export function ProgressBar({ value, className, trackClassName = 'bg-surface-2', barClassName = 'bg-accent', label }: ProgressBarProps) {
   const pct = Math.round(Math.min(1, Math.max(0, value)) * 100)
   return (
     <div
@@ -17,7 +18,7 @@ export function ProgressBar({ value, className, barClassName = 'bg-accent', labe
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={pct}
-      className={cn('h-4 w-full overflow-hidden rounded-full bg-surface-2', className)}
+      className={cn('h-4 w-full overflow-hidden rounded-full', trackClassName, className)}
     >
       <motion.div
         className={cn('relative h-full rounded-full', barClassName)}

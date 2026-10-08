@@ -54,7 +54,7 @@ export function LevelSection({ level, nodes, statuses, currentId }: LevelSection
           </p>
         ) : (
           <div className="relative mt-4 flex items-center gap-3">
-            <ProgressBar value={doneCount / nodes.length} className="h-3 bg-black/15" barClassName="bg-white" label={`Progreso del nivel ${level.id}`} />
+            <ProgressBar value={doneCount / nodes.length} className="h-3" trackClassName="bg-black/15" barClassName="bg-white" label={`Progreso del nivel ${level.id}`} />
             <span className="shrink-0 text-sm font-extrabold">
               {doneCount}/{nodes.length}
             </span>
@@ -79,7 +79,7 @@ export function LevelSection({ level, nodes, statuses, currentId }: LevelSection
       </div>
 
       {!locked && open && (
-        <ol className="mt-12 mb-6 flex flex-col items-center gap-7">
+        <ol className="mt-16 mb-6 flex flex-col items-center gap-12">
           {nodes.map((node, i) => {
             const milestone = node.kind === 'review20' || node.kind === 'exam50'
             const first = node.itemIds[0] ? level.items.findIndex((it) => it.id === node.itemIds[0]) + 1 : 1
