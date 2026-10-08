@@ -9,6 +9,11 @@ let html = read('index.html')
 
 html = html.replace(/<script type="module" crossorigin src="\.\/(assets\/[^"]+\.js)"><\/script>/g, (_, file) => {
   const js = read(file).replace(/<\/script/gi, '<\\/script')
+  // "<!--" inside an inline script can stop "</script>" from closing it.
+  if (js.includes('<!--')) {
+    console.error(`inline-build: ${file} contains "<!--", which is unsafe to inline`)
+    process.exit(1)
+  }
   return `<script type="module">${js}</script>`
 })
 html = html.replace(/<link rel="stylesheet" crossorigin href="\.\/(assets\/[^"]+\.css)">/g, (_, file) => `<style>${read(file)}</style>`)

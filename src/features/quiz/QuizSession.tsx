@@ -118,6 +118,7 @@ export function QuizSession({ step, items, onContinue, onHome, generate }: QuizS
           <PlayerHeader title={title} progress={1} onClose={onHome} />
           <QuizResult
             result={result}
+            passTitle={step.kind === 'exam50' ? 'Examen superado' : step.kind === 'review20' ? 'Repaso superado' : 'Quiz superado'}
             missed={missed}
             attempt={attempt}
             unlocked={unlocked}
@@ -132,7 +133,7 @@ export function QuizSession({ step, items, onContinue, onHome, generate }: QuizS
         <StudyPlayer
           title="Repaso de las palabras falladas"
           items={missed}
-          finishLabel="Volver a hacer el quiz"
+          finishLabel="Repetir el quiz"
           onClose={askToLeave}
           onFinish={() => startAttempt(missed.map((i) => i.id), attempt + 1)}
         />

@@ -6,6 +6,8 @@ import type { QuizResult as Result } from './QuizPlayer'
 
 interface QuizResultProps {
   result: Result
+  /** Heading when every answer is right, e.g. "Examen superado". */
+  passTitle: string
   missed: Item[]
   attempt: number
   unlocked?: Level
@@ -14,7 +16,7 @@ interface QuizResultProps {
   onHome: () => void
 }
 
-export function QuizResult({ result, missed, attempt, unlocked, onContinue, onReview, onHome }: QuizResultProps) {
+export function QuizResult({ result, passTitle, missed, attempt, unlocked, onContinue, onReview, onHome }: QuizResultProps) {
   const passed = result.correct === result.total
   return (
     <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
@@ -22,7 +24,7 @@ export function QuizResult({ result, missed, attempt, unlocked, onContinue, onRe
         <div className="flex items-start gap-3">
           {passed ? <CircleCheck className="h-8 w-8 shrink-0 text-ok" /> : <CircleX className="h-8 w-8 shrink-0 text-bad" />}
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">{passed ? 'Quiz superado' : 'Todavía no'}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">{passed ? passTitle : 'Todavía no'}</h1>
             <p className="mt-1 text-muted tabular-nums">
               {result.correct} de {result.total} respuestas correctas{attempt > 1 ? ` · intento ${attempt}` : ''}
             </p>
@@ -41,7 +43,7 @@ export function QuizResult({ result, missed, attempt, unlocked, onContinue, onRe
         {!passed && (
           <>
             <p className="mt-6">
-              Para avanzar hay que responder todo bien. Repasa {missed.length === 1 ? 'la palabra que fallaste' : `las ${missed.length} palabras que fallaste`} y luego vuelve a hacer el quiz.
+              Para avanzar hay que responder todo bien. Repasa {missed.length === 1 ? 'la palabra que fallaste' : `las ${missed.length} palabras que fallaste`} y luego repite el quiz.
             </p>
             <ul className="mt-4 flex flex-col divide-y divide-line rounded-lg border border-line">
               {missed.map((item) => (
@@ -60,16 +62,16 @@ export function QuizResult({ result, missed, attempt, unlocked, onContinue, onRe
         )}
       </article>
 
-      <div className="mt-6 flex flex-wrap justify-end gap-2">
-        <Button variant="ghost" size="lg" onClick={onHome}>
+      <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <Button variant="ghost" size="lg" className="w-full sm:w-auto" onClick={onHome}>
           Volver al índice
         </Button>
         {passed ? (
-          <Button size="lg" onClick={onContinue} autoFocus>
+          <Button size="lg" className="w-full sm:w-auto" onClick={onContinue} autoFocus>
             Continuar
           </Button>
         ) : (
-          <Button size="lg" onClick={onReview} autoFocus>
+          <Button size="lg" className="w-full sm:w-auto" onClick={onReview} autoFocus>
             Repasar las palabras falladas
           </Button>
         )}

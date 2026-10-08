@@ -52,7 +52,7 @@ test('a mistake forces a review of the missed word and a retake until all answer
   await user.click(screen.getByRole('button', { name: 'Repasar las palabras falladas' }))
   expect(screen.getByRole('heading', { level: 1, name: hello.en })).toBeInTheDocument()
   expect(screen.getByText(hello.examples[2].en)).toBeInTheDocument()
-  await user.click(screen.getByRole('button', { name: /Volver a hacer el quiz/ }))
+  await user.click(screen.getByRole('button', { name: /Repetir el quiz/ }))
   expect(generate).toHaveBeenLastCalledWith([hello.id], 2)
 
   await answer(user, 'hello')
@@ -87,6 +87,7 @@ test('passing the level exam for the first time announces the unlocked level', a
   await user.click(screen.getByRole('button', { name: 'Empezar' }))
   await answer(user, 'hello')
   await user.click(screen.getByRole('button', { name: /Ver resultado/ }))
+  expect(screen.getByRole('heading', { name: 'Examen superado' })).toBeInTheDocument()
   expect(screen.getByText(/Desbloqueaste el/)).toHaveTextContent('nivel 2: Mi día a día')
 })
 
