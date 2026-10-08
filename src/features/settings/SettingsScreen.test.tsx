@@ -10,9 +10,9 @@ test('settings update the store', async () => {
   render(<SettingsScreen />)
   await user.click(screen.getByRole('radio', { name: 'Oscuro' }))
   expect(useProgress.getState().settings.theme).toBe('dark')
-  await user.click(screen.getByRole('switch', { name: 'Pronunciar automáticamente' }))
-  expect(useProgress.getState().settings.autoplay).toBe(false)
+  // Without English voices there is nothing to pronounce, so audio settings are hidden.
   expect(screen.getByText(/no tiene voces en inglés/)).toBeInTheDocument()
+  expect(screen.queryByRole('switch', { name: 'Pronunciar automáticamente' })).not.toBeInTheDocument()
 })
 
 test('reset clears progress after confirmation', async () => {

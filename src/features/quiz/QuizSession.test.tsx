@@ -115,3 +115,26 @@ test('option keys do nothing while the exit dialog is open', async () => {
   await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Seguir' }))
   expect(screen.getByRole('button', { name: 'Responder' })).toBeDisabled()
 })
+
+test('Tab to an option and Enter selects it; Enter again answers', async () => {
+  const user = userEvent.setup()
+  const step = getNode('1:1')!
+  render(<QuizSession step={step} items={nodeItems(step)} onContinue={() => {}} onHome={() => {}} generate={twoQuestions} />)
+  await user.click(screen.getByRole('button', { name: 'Empezar' }))
+  await user.keyboard('b') // pick B ("goodbye", wrong) first
+  screen.getByRole('radio', { name: /hello/ }).focus()
+  await user.keyboard('{Enter}')
+  expect(screen.getByRole('radio', { name: /hello/ })).toHaveAttribute('aria-checked', 'true')
+  expect(screen.queryByRole('status')).toBeEmptyDOMElement()
+  await user.keyboard('{Enter}')
+  expect(screen.getByText('Correcto.')).toBeInTheDocument()
+})
+
+test('shortcuts with modifier keys are ignored', async () => {
+  const user = userEvent.setup()
+  const step = getNode('1:1')!
+  render(<QuizSession step={step} items={nodeItems(step)} onContinue={() => {}} onHome={() => {}} generate={twoQuestions} />)
+  await user.click(screen.getByRole('button', { name: 'Empezar' }))
+  await user.keyboard('{Control>}c{/Control}')
+  expect(screen.getByRole('button', { name: 'Responder' })).toBeDisabled()
+})

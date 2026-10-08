@@ -5,15 +5,12 @@ import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { Segmented } from '../../components/Segmented'
 import { Switch } from '../../components/Switch'
 import { useEnglishVoices } from '../../lib/speech'
-import { useProgress, type ThemePreference } from '../../store/progress'
+import { SPEECH_RATES, useProgress, type ThemePreference } from '../../store/progress'
 import { COURSE, COURSE_PATH } from '../course'
 import { useSettings, useSpeak } from '../hooks'
 
-const RATES = [
-  { value: 0.75, label: 'Lenta' },
-  { value: 0.95, label: 'Normal' },
-  { value: 1.1, label: 'Rápida' },
-]
+const RATE_LABELS = ['Lenta', 'Normal', 'Rápida']
+const RATES = SPEECH_RATES.map((value, i) => ({ value, label: RATE_LABELS[i] }))
 
 function Row({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
   return (
@@ -58,13 +55,13 @@ export function SettingsScreen() {
             ]}
           />
         </Row>
-        <Row title="Pronunciar automáticamente" hint="Escucha cada palabra al aparecer">
-          <div className="flex sm:justify-end">
-            <Switch label="Pronunciar automáticamente" checked={settings.autoplay} onChange={(autoplay) => updateSettings({ autoplay })} />
-          </div>
-        </Row>
         {voices.length > 0 ? (
           <>
+            <Row title="Pronunciar automáticamente" hint="Escucha cada palabra al aparecer">
+              <div className="flex sm:justify-end">
+                <Switch label="Pronunciar automáticamente" checked={settings.autoplay} onChange={(autoplay) => updateSettings({ autoplay })} />
+              </div>
+            </Row>
             <Row title="Velocidad de la voz">
               <Segmented<number> label="Velocidad de la voz" value={settings.rate} onChange={(rate) => updateSettings({ rate })} options={RATES} />
             </Row>

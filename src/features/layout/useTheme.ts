@@ -20,7 +20,7 @@ export function useTheme() {
       const dark = resolveDark(theme, root.getAttribute('data-theme'), !!media?.matches)
       root.classList.toggle('dark', dark)
       root.classList.toggle('light', !dark && theme === 'light')
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#0b0f1d' : '#6366f1')
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#0f131b' : '#1d5bd8')
     }
     apply()
     media?.addEventListener?.('change', apply)

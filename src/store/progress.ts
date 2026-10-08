@@ -84,6 +84,13 @@ export function safeJSONStorage<S>(getStorage: () => Storage): PersistStorage<S>
   }
 }
 
+export const SPEECH_RATES = [0.75, 0.95, 1.1]
+
+/** Closest supported speech speed. */
+function snapRate(rate: number): number {
+  return SPEECH_RATES.reduce((best, r) => (Math.abs(r - rate) < Math.abs(best - rate) ? r : best))
+}
+
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v)
 
 /** Upgrades saved progress from older versions, keeping what still applies. */
@@ -104,7 +111,7 @@ export function migrateProgress(persisted: unknown, _version: number): ProgressD
   const settings: Settings = {
     theme: old.theme === 'light' || old.theme === 'dark' ? old.theme : 'system',
     voiceURI: typeof old.voiceURI === 'string' ? old.voiceURI : null,
-    rate: typeof old.rate === 'number' ? old.rate : DEFAULT_SETTINGS.rate,
+    rate: typeof old.rate === 'number' ? snapRate(old.rate) : DEFAULT_SETTINGS.rate,
     autoplay: typeof old.autoplay === 'boolean' ? old.autoplay : DEFAULT_SETTINGS.autoplay,
   }
   return { version: VERSION, completed, mistakes, settings }

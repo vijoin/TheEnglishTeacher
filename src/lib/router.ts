@@ -10,7 +10,11 @@ export function parseRoute(hash: string): Route {
   const parts = hash.replace(/^#\/?/, '').split('/').filter(Boolean)
   switch (parts[0]) {
     case 'play':
-      return parts[1] ? { name: 'play', nodeId: decodeURIComponent(parts[1]) } : { name: 'home' }
+      try {
+        return parts[1] ? { name: 'play', nodeId: decodeURIComponent(parts[1]) } : { name: 'home' }
+      } catch {
+        return { name: 'home' }
+      }
     case 'vocab':
       return { name: 'vocab' }
     case 'settings':

@@ -102,3 +102,8 @@ describe('typo tolerance never accepts a different word', () => {
     expect(checkTyped('wher iz thee bathrom', { en: 'Where is the bathroom?' }, vocab)).toBe('wrong')
   })
 })
+
+test('two swapped letters count as one slip', () => {
+  expect(levenshtein('nieghbor', 'neighbor')).toBe(1)
+  expect(checkTyped('nieghbor', { en: 'neighbor' })).toBe('typo')
+})

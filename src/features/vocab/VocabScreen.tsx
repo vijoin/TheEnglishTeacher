@@ -75,7 +75,7 @@ export function VocabScreen() {
                         <ul className="flex flex-col gap-2 px-11 pb-4">
                           {item.examples.map((ex) => (
                             <li key={ex.en} className="flex items-start gap-2 text-sm">
-                              <AudioButton text={ex.en} className="h-7 w-7 border-transparent" />
+                              <AudioButton text={ex.en} className="h-8 w-8 border-transparent" />
                               <span>
                                 <span lang="en">{ex.en}</span>
                                 <span className="block text-muted">{ex.es}</span>

@@ -30,3 +30,7 @@ test('navigation keeps working when the browser refuses history updates', () => 
   push.mockRestore()
   act(() => navigate('/', { replace: true }))
 })
+
+test('a malformed link falls back to home instead of crashing', () => {
+  expect(parseRoute('#/play/%')).toEqual({ name: 'home' })
+})

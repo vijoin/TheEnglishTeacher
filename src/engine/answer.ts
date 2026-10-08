@@ -29,20 +29,20 @@ export function normalizeAnswer(s: string): string {
     .trim()
 }
 
+/** Edit distance where swapping two neighbouring letters counts as one edit. */
 export function levenshtein(a: string, b: string): number {
   if (a === b) return 0
   if (!a.length) return b.length
   if (!b.length) return a.length
-  let prev = Array.from({ length: b.length + 1 }, (_, i) => i)
+  const d = Array.from({ length: a.length + 1 }, (_, i) => Array.from({ length: b.length + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0)))
   for (let i = 1; i <= a.length; i++) {
-    const cur = [i]
     for (let j = 1; j <= b.length; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1
-      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost)
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost)
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1)
     }
-    prev = cur
   }
-  return prev[b.length]
+  return d[a.length][b.length]
 }
 
 const MIN_FUZZY_WORD = 4

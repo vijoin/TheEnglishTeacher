@@ -95,3 +95,8 @@ describe('safeJSONStorage', () => {
     expect(safeJSONStorage(() => window.localStorage).getItem('x')).toBeNull()
   })
 })
+
+test('migration snaps an unexpected speech rate to a supported speed', () => {
+  expect(migrateProgress({ settings: { rate: 9 } }, 1).settings.rate).toBe(1.1)
+  expect(migrateProgress({ settings: { rate: 0.1 } }, 1).settings.rate).toBe(0.75)
+})

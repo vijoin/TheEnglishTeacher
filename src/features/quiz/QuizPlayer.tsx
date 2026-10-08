@@ -1,5 +1,5 @@
 import { ArrowRight } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '../../components/Button'
 import { gradeQuestion, type Grade, type Response } from '../../engine/grade'
 import type { Question } from '../../engine/quiz'
@@ -37,6 +37,11 @@ export function QuizPlayer({ title, questions, onFinish, onClose }: QuizPlayerPr
   const question = questions[index]
   const item = getItem(question.itemId)!
   const last = index === questions.length - 1
+  const cardRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (index > 0 && question.type !== 'type') cardRef.current?.focus({ preventScroll: true })
+  }, [index, question.type])
 
   const answer = useCallback(() => {
     if (grade || !response || !hasAnswer(response)) return
@@ -64,14 +69,19 @@ export function QuizPlayer({ title, questions, onFinish, onClose }: QuizPlayerPr
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Enter' || isButtonTarget(e) || document.querySelector('[role="alertdialog"]')) return
+      if (e.key !== 'Enter' || e.repeat || document.querySelector('[role="alertdialog"]')) return
+      const option = e.target instanceof HTMLElement ? e.target.closest<HTMLElement>('[data-choice]') : null
+      const selected = response?.kind === 'choice' ? response.value : null
+      // Enter on a focused option the learner hasn't chosen yet just chooses it.
+      if (option && !grade && option.dataset.value !== selected) return
+      if (isButtonTarget(e)) return
       e.preventDefault()
       if (grade) next()
       else answer()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [grade, next, answer])
+  }, [grade, next, answer, response])
 
   return (
     <>
@@ -81,14 +91,20 @@ export function QuizPlayer({ title, questions, onFinish, onClose }: QuizPlayerPr
         onClose={onClose}
         right={`${index + 1} / ${questions.length}`}
       />
-      <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
-        <article key={question.id} className="animate-enter rounded-xl border border-line bg-surface p-5 shadow-sm sm:p-8">
+      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
+        <article
+          key={question.id}
+          ref={cardRef}
+          tabIndex={-1}
+          aria-label={`Pregunta ${index + 1} de ${questions.length}`}
+          className="animate-enter rounded-xl border border-line bg-surface p-5 shadow-sm outline-none sm:p-8"
+        >
           <p className="mb-4 text-sm text-muted tabular-nums">
             Pregunta {index + 1} de {questions.length}
           </p>
           <QuestionView question={question} item={item} response={response} grade={grade} onResponse={setResponse} />
         </article>
-      </div>
+      </main>
       <PlayerFooter>
         {grade ? (
           <Button size="lg" onClick={next} autoFocus>

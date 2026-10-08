@@ -99,7 +99,7 @@ export function HomeScreen() {
         <h2 id="levels-title" className="text-sm font-medium text-muted">
           Niveles
         </h2>
-        <div role="tablist" aria-label="Niveles" className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-6">
+        <div role="group" aria-label="Niveles" className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-6">
           {COURSE.map((l) => {
             const levelSteps = COURSE_PATH.filter((n) => n.levelId === l.id)
             const locked = statuses[levelSteps[0].id] === 'locked'
@@ -108,8 +108,7 @@ export function HomeScreen() {
               <button
                 key={l.id}
                 type="button"
-                role="tab"
-                aria-selected={l.id === levelId}
+                aria-pressed={l.id === levelId}
                 onClick={() => setLevelId(l.id)}
                 className={cn(
                   'flex flex-col items-start rounded-lg border px-3 py-2 text-left transition',

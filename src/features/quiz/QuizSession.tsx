@@ -74,7 +74,7 @@ export function QuizSession({ step, items, onContinue, onHome, generate }: QuizS
       {phase === 'intro' && (
         <>
           <PlayerHeader title={title} progress={0} onClose={onHome} />
-          <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
+          <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
             <article className="animate-enter rounded-xl border border-line bg-surface p-5 shadow-sm sm:p-8">
               <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
               <p className="mt-2 text-muted">{description}</p>
@@ -95,7 +95,7 @@ export function QuizSession({ step, items, onContinue, onHome, generate }: QuizS
                 </Button>
               </div>
             </article>
-          </div>
+          </main>
         </>
       )}
 
@@ -142,7 +142,7 @@ export function QuizSession({ step, items, onContinue, onHome, generate }: QuizS
       <ConfirmDialog
         open={confirmExit}
         title="¿Salir?"
-        message="Este paso quedará pendiente. Tendrás que hacer el quiz desde el principio."
+        message={wasDone ? 'Este paso ya está completado; no se guardará este intento.' : 'Este paso quedará pendiente. Tendrás que hacer el quiz desde el principio.'}
         confirmLabel="Salir"
         cancelLabel="Seguir"
         danger

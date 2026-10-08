@@ -31,7 +31,7 @@ export function StudyPlayer({ title, items, finishLabel, onFinish, onClose }: St
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (document.querySelector('[role="alertdialog"]')) return
+      if (e.repeat || document.querySelector('[role="alertdialog"]')) return
       if (e.key === 'ArrowRight' || (e.key === 'Enter' && !isButtonTarget(e))) {
         e.preventDefault()
         next()
@@ -46,9 +46,9 @@ export function StudyPlayer({ title, items, finishLabel, onFinish, onClose }: St
   return (
     <>
       <PlayerHeader title={title} progress={(index + 1) / items.length} onClose={() => onClose(index > 0)} />
-      <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
+      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
         <StudyCard key={item.id} item={item} position={index + 1} total={items.length} />
-      </div>
+      </main>
       <PlayerFooter>
         <Button variant="secondary" size="lg" onClick={back} disabled={index === 0}>
           <ArrowLeft className="h-5 w-5" /> Anterior

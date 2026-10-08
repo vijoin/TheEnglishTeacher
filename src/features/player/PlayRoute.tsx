@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { nextNodeId } from '../../engine/path'
 import { navigate } from '../../lib/router'
+import { stopSpeaking } from '../../lib/speech'
 import { useProgress } from '../../store/progress'
 import { COURSE_PATH, getNode, nodeItems, nodeLabel } from '../course'
 import { useStepStatuses } from '../hooks'
@@ -23,6 +24,8 @@ export function PlayRoute({ stepId }: { stepId: string }) {
   useEffect(() => {
     if (!allowed) home()
   }, [allowed])
+
+  useEffect(() => stopSpeaking, [])
 
   if (!step || !allowed) return null
   const nextId = nextNodeId(COURSE_PATH, step.id)

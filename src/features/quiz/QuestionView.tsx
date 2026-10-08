@@ -35,7 +35,7 @@ export function QuestionView({ question, item, response, grade, onResponse }: Qu
     if (grade || question.type === 'type') return
     const options = question.options
     const onKey = (e: KeyboardEvent) => {
-      if (document.querySelector('[role="alertdialog"]')) return
+      if (e.ctrlKey || e.metaKey || e.altKey || e.repeat || document.querySelector('[role="alertdialog"]')) return
       const k = e.key.toUpperCase()
       const i = /^[1-4]$/.test(k) ? Number(k) - 1 : LETTERS.indexOf(k)
       if (i >= 0 && i < options.length) onResponse({ kind: 'choice', value: options[i] })
@@ -97,6 +97,7 @@ export function QuestionView({ question, item, response, grade, onResponse }: Qu
                 type="button"
                 role="radio"
                 data-choice
+                data-value={option}
                 aria-checked={selected}
                 disabled={!!grade}
                 onClick={() => onResponse({ kind: 'choice', value: option })}
@@ -128,22 +129,24 @@ export function QuestionView({ question, item, response, grade, onResponse }: Qu
         </div>
       )}
 
-      {grade && (
-        <div role="status" className={cn('mt-5 animate-enter rounded-lg p-4', grade.correct ? 'bg-ok-soft' : 'bg-bad-soft')}>
-          <p className={cn('font-semibold', grade.correct ? 'text-ok' : 'text-bad')}>
-            {grade.correct ? (grade.typo ? 'Correcto, pero revisa la ortografía.' : 'Correcto.') : 'Incorrecto.'}
-          </p>
-          <div className="mt-1 flex items-center gap-2">
-            <AudioButton text={item.en} className="h-8 w-8" />
-            <p>
-              <span lang="en" className="font-medium">
-                {item.en}
-              </span>{' '}
-              <span className="text-muted">= {item.es}</span>
+      <div role="status" aria-live="polite">
+        {grade && (
+          <div className={cn('mt-5 animate-enter rounded-lg p-4', grade.correct ? 'bg-ok-soft' : 'bg-bad-soft')}>
+            <p className={cn('font-semibold', grade.correct ? 'text-ok' : 'text-bad')}>
+              {grade.correct ? (grade.typo ? 'Correcto, pero revisa la ortografía.' : 'Correcto.') : 'Incorrecto.'}
             </p>
+            <div className="mt-1 flex items-center gap-2">
+              <AudioButton text={item.en} className="h-8 w-8" />
+              <p>
+                <span lang="en" className="font-medium">
+                  {item.en}
+                </span>{' '}
+                <span className="text-muted">= {item.es}</span>
+              </p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

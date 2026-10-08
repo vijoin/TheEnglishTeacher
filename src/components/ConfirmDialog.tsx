@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Button } from './Button'
 
 interface ConfirmDialogProps {
@@ -13,17 +13,32 @@ interface ConfirmDialogProps {
 }
 
 export function ConfirmDialog({ open, title, message, confirmLabel, cancelLabel = 'Cancelar', danger, onConfirm, onCancel }: ConfirmDialogProps) {
+  const ref = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     if (!open) return
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onCancel()
+    const previous = document.activeElement as HTMLElement | null
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onCancel()
+      if (e.key !== 'Tab' || !ref.current) return
+      // Keep keyboard focus inside the dialog.
+      const buttons = [...ref.current.querySelectorAll<HTMLElement>('button')]
+      const i = buttons.indexOf(document.activeElement as HTMLElement)
+      e.preventDefault()
+      buttons[(i + (e.shiftKey ? -1 : 1) + buttons.length) % buttons.length]?.focus()
+    }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      previous?.focus?.()
+    }
   }, [open, onCancel])
 
   if (!open) return null
   return (
     <div className="fixed inset-0 z-50 grid animate-enter place-items-center bg-black/40 p-4" onClick={onCancel}>
       <div
+        ref={ref}
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="confirm-title"

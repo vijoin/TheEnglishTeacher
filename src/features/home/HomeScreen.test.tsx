@@ -18,8 +18,8 @@ test('a new learner starts with lesson 1; everything after it is locked', () => 
 test('locked levels explain how to unlock them', async () => {
   const user = userEvent.setup()
   render(<HomeScreen />)
-  const tabs = screen.getByRole('tablist', { name: 'Niveles' })
-  await user.click(within(tabs).getByRole('tab', { name: /Nivel 2/ }))
+  const levels = screen.getByRole('group', { name: 'Niveles' })
+  await user.click(within(levels).getByRole('button', { name: /Nivel 2/ }))
   expect(screen.getByText(/Supera el examen del nivel 1 sin errores/)).toBeInTheDocument()
 })
 
@@ -29,5 +29,5 @@ test('finishing level 1 unlocks level 2 and marks level 1 done', () => {
   render(<HomeScreen />)
   expect(screen.getByRole('heading', { name: 'Mi día a día' })).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Lección 1 · Rutina de la mañana — disponible' })).toBeEnabled()
-  expect(screen.getByRole('tab', { name: /Nivel 1/ })).toContainElement(screen.getByLabelText('superado'))
+  expect(screen.getByRole('button', { name: /Nivel 1/ })).toContainElement(screen.getByLabelText('superado'))
 })

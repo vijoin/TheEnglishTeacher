@@ -19,7 +19,7 @@ interface QuizResultProps {
 export function QuizResult({ result, passTitle, missed, attempt, unlocked, onContinue, onReview, onHome }: QuizResultProps) {
   const passed = result.correct === result.total
   return (
-    <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
+    <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
       <article className="animate-enter rounded-xl border border-line bg-surface p-5 shadow-sm sm:p-8">
         <div className="flex items-start gap-3">
           {passed ? <CircleCheck className="h-8 w-8 shrink-0 text-ok" /> : <CircleX className="h-8 w-8 shrink-0 text-bad" />}
@@ -76,6 +76,6 @@ export function QuizResult({ result, passTitle, missed, attempt, unlocked, onCon
           </Button>
         )}
       </div>
-    </div>
+    </main>
   )
 }
