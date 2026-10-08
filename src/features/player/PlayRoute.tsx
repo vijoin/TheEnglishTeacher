@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { navigate } from '../../lib/router'
 import { getLevel, getNode, nodeItems } from '../course'
 import { useNodeStatuses } from '../hooks'
@@ -9,6 +9,8 @@ export function PlayRoute({ nodeId }: { nodeId: string }) {
   const statuses = useNodeStatuses()
   const node = getNode(nodeId)
   const allowed = !!node && statuses[nodeId] !== 'locked'
+  // Stable identity so the quiz isn't regenerated when progress changes.
+  const items = useMemo(() => (node ? nodeItems(node) : []), [node])
 
   useEffect(() => {
     if (!allowed) navigate('/', { replace: true })
@@ -18,7 +20,6 @@ export function PlayRoute({ nodeId }: { nodeId: string }) {
   const level = getLevel(node.levelId)!
   if (node.kind === 'lesson') return <LessonPlayer node={node} />
 
-  const items = nodeItems(node)
   const first = level.items.findIndex((i) => i.id === items[0].id) + 1
   const description =
     node.kind === 'quiz5'
